@@ -253,4 +253,26 @@
     })
   });
 
+  /**
+   * Auto-calculate age from a data-birth attribute on an element with id="age"
+   * Expects ISO date (YYYY-MM-DD) in data-birth. If present, replaces the element's
+   * text content with the computed age on window load.
+   */
+  const setAgeFromBirthdate = () => {
+    const ageEl = select('#age')
+    if (!ageEl) return
+    const birth = ageEl.dataset.birth
+    if (!birth) return
+    const birthDate = new Date(birth)
+    if (isNaN(birthDate)) return
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const m = today.getMonth() - birthDate.getMonth()
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    ageEl.textContent = age
+  }
+  window.addEventListener('load', setAgeFromBirthdate)
+
 })()
