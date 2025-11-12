@@ -332,5 +332,48 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   window.addEventListener('load', setAgeFromBirthdate)
 
+  /**
+   * Contact form submit handler — posts to Netlify Function at /.netlify/functions/contact
+   */
+  const setupContactForm = () => {
+    const form = select('#contact-form')
+    if (!form) return
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const loading = form.querySelector('.loading')
+      const errorEl = form.querySelector('.error-message')
+      const successEl = form.querySelector('.sent-message')
+      if (loading) loading.style.display = 'block'
+      if (errorEl) errorEl.innerHTML = ''
+      if (successEl) successEl.style.display = 'none'
+      const payload = {
+        name: form.name?.value || '',
+        email: form.email?.value || '',
+        subject: form.subject?.value || '',
+        message: form.message?.value || ''
+      }
+      try {
+        const res = await fetch('/.netlify/functions/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        const data = await res.json().catch(() => ({}))
+        if (loading) loading.style.display = 'none'
+        if (res.ok) {
+          if (successEl) successEl.style.display = 'block'
+          form.reset()
+        } else {
+          if (errorEl) errorEl.innerHTML = data.error || data.message || 'Failed to send message.'
+        }
+      } catch (err) {
+        if (loading) loading.style.display = 'none'
+        if (errorEl) errorEl.innerHTML = 'Network error. Please try again later.'
+        console.error(err)
+      }
+    })
+  }
+  window.addEventListener('load', setupContactForm)
+
 
 })()
