@@ -4,6 +4,63 @@
 * Author: BootstrapMade.com
 * License: https://bootstrapmade.com/license/
 */
+// Contact form handler
+async function handleContactForm(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const formData = {
+    name: form.name.value,
+    email: form.email.value,
+    message: form.message.value,
+    timestamp: new Date().toISOString()
+  };
+
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+
+  try {
+    // Show loading state
+    submitBtn.textContent = 'Sending...';
+    submitBtn.disabled = true;
+
+    // Send to Netlify function
+    const response = await fetch('/.netlify/functions/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      // Success
+      alert(result.message || 'Message sent successfully!');
+      form.reset();
+    } else {
+      // Error from function
+      throw new Error(result.error || 'Something went wrong');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to send message. Please try again or email me directly.');
+  } finally {
+    // Reset button
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+// Attach to your form
+document.addEventListener('DOMContentLoaded', function() {
+  const contactForm = document.getElementById('contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleContactForm);
+  }
+});
 (function() {
   "use strict";
 
@@ -274,5 +331,6 @@
     ageEl.textContent = age
   }
   window.addEventListener('load', setAgeFromBirthdate)
+
 
 })()
