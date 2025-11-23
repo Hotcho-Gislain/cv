@@ -12,6 +12,7 @@ async function handleContactForm(event) {
   const formData = {
     name: form.name.value,
     email: form.email.value,
+    subject: form.subject.value,
     message: form.message.value,
     timestamp: new Date().toISOString()
   };
