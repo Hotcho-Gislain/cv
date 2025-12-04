@@ -4,64 +4,6 @@
 * Author: BootstrapMade.com
 * License: https://bootstrapmade.com/license/
 */
-// Contact form handler
-async function handleContactForm(event) {
-  event.preventDefault();
-  
-  const form = event.target;
-  const formData = {
-    name: form.name.value,
-    email: form.email.value,
-    subject: form.subject.value,
-    message: form.message.value,
-    timestamp: new Date().toISOString()
-  };
-
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-
-  try {
-    // Show loading state
-    submitBtn.textContent = 'Sending...';
-    submitBtn.disabled = true;
-
-    // Send to Netlify function
-    const response = await fetch('/.netlify/functions/contact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData)
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      // Success
-      alert(result.message || 'Message sent successfully!');
-      form.reset();
-    } else {
-      // Error from function
-      throw new Error(result.error || 'Something went wrong');
-    }
-
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Failed to send message. Please try again or email me directly.');
-  } finally {
-    // Reset button
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-  }
-}
-
-// Attach to your form
-document.addEventListener('DOMContentLoaded', function() {
-  const contactForm = document.getElementById('contact-form');
-  if (contactForm) {
-    contactForm.addEventListener('submit', handleContactForm);
-  }
-});
 (function() {
   "use strict";
 
@@ -334,47 +276,65 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('load', setAgeFromBirthdate)
 
   /**
-   * Contact form submit handler — posts to Netlify Function at /.netlify/functions/contact
+   * Contact form submit handler — posts to Netlify Function
    */
   const setupContactForm = () => {
     const form = select('#contact-form')
     if (!form) return
+    
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
+      
       const loading = form.querySelector('.loading')
       const errorEl = form.querySelector('.error-message')
       const successEl = form.querySelector('.sent-message')
+      const submitBtn = form.querySelector('button[type="submit"]')
+      
+      // Show loading state
       if (loading) loading.style.display = 'block'
-      if (errorEl) errorEl.innerHTML = ''
+      if (errorEl) { errorEl.innerHTML = ''; errorEl.style.display = 'none' }
       if (successEl) successEl.style.display = 'none'
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...' }
+      
       const payload = {
         name: form.name?.value || '',
         email: form.email?.value || '',
         subject: form.subject?.value || '',
         message: form.message?.value || ''
       }
+      
       try {
         const res = await fetch('/.netlify/functions/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
+        
         const data = await res.json().catch(() => ({}))
+        
         if (loading) loading.style.display = 'none'
+        
         if (res.ok) {
           if (successEl) successEl.style.display = 'block'
           form.reset()
         } else {
-          if (errorEl) errorEl.innerHTML = data.error || data.message || 'Failed to send message.'
+          if (errorEl) {
+            errorEl.innerHTML = data.error || 'Failed to send message. Please try again.'
+            errorEl.style.display = 'block'
+          }
         }
       } catch (err) {
         if (loading) loading.style.display = 'none'
-        if (errorEl) errorEl.innerHTML = 'Network error. Please try again later.'
-        console.error(err)
+        if (errorEl) {
+          errorEl.innerHTML = 'Network error. Please try again later.'
+          errorEl.style.display = 'block'
+        }
+        console.error('Contact form error:', err)
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send Message' }
       }
     })
   }
   window.addEventListener('load', setupContactForm)
-
 
 })()
