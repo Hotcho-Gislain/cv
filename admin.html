@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Portfolio CMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #149ddd;
+      --dark: #040b14;
+      --sidebar-width: 260px;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      min-height: 100vh;
+    }
+    
+    /* Login Page */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--dark) 0%, #1a2a3a 100%);
+    }
+    
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .login-card h2 {
+      color: var(--dark);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .login-card .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      padding: 12px;
+      font-weight: 600;
+    }
+    
+    .login-card .btn-primary:hover {
+      background: #117daa;
+    }
+    
+    /* Dashboard Layout */
+    .dashboard-container {
+      display: none;
+    }
+    
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--dark);
+      padding: 20px 0;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .sidebar-header h4 {
+      color: white;
+      margin: 0;
+    }
+    
+    .sidebar-header small {
+      color: rgba(255,255,255,0.5);
+    }
+    
+    .sidebar-nav {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .sidebar-nav li a:hover,
+    .sidebar-nav li a.active {
+      background: rgba(255,255,255,0.1);
+      color: var(--primary);
+    }
+    
+    .sidebar-nav li a i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 30px;
+      min-height: 100vh;
+    }
+    
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .content-header h2 {
+      margin: 0;
+      color: var(--dark);
+    }
+    
+    .edit-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    
+    .edit-card-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .edit-card-header h5 {
+      margin: 0;
+      color: var(--dark);
+    }
+    
+    .edit-card-body {
+      padding: 20px;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: #555;
+    }
+    
+    .btn-save {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-save:hover {
+      background: #117daa;
+      color: white;
+    }
+    
+    .image-preview {
+      max-width: 150px;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #eee;
+    }
+    
+    .section-panel {
+      display: none;
+    }
+    
+    .section-panel.active {
+      display: block;
+    }
+    
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-saved {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-unsaved {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .logout-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    
+    .skill-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    
+    .skill-item input:first-child {
+      flex: 2;
+    }
+    
+    .skill-item input:last-of-type {
+      flex: 1;
+      max-width: 100px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="text-center">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+      <p class="mt-3">Loading...</p>
+    </div>
+  </div>
+
+  <!-- Login Container -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-card">
+      <h2><i class="bi bi-shield-lock"></i> Admin Login</h2>
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="loginEmail" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" required>
+        </div>
+        <div class="mb-3 text-danger" id="loginError" style="display:none;"></div>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-box-arrow-in-right"></i> Login
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Container -->
+  <div class="dashboard-container" id="dashboardContainer">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <h4><i class="bi bi-gear-fill"></i> Portfolio CMS</h4>
+        <small id="adminEmail"></small>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" data-section="hero" class="active"><i class="bi bi-house"></i> Hero Section</a></li>
+        <li><a href="#" data-section="about"><i class="bi bi-person"></i> About</a></li>
+        <li><a href="#" data-section="facts"><i class="bi bi-graph-up"></i> Facts/Stats</a></li>
+        <li><a href="#" data-section="skills"><i class="bi bi-tools"></i> Skills</a></li>
+        <li><a href="#" data-section="resume"><i class="bi bi-file-text"></i> Resume</a></li>
+        <li><a href="#" data-section="services"><i class="bi bi-briefcase"></i> Services</a></li>
+        <li><a href="#" data-section="contact"><i class="bi bi-envelope"></i> Contact Info</a></li>
+      </ul>
+      <button class="btn btn-outline-danger logout-btn" id="logoutBtn">
+        <i class="bi bi-box-arrow-left"></i> Logout
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-header">
+        <h2 id="sectionTitle">Hero Section</h2>
+        <a href="index.html" target="_blank" class="btn btn-outline-secondary">
+          <i class="bi bi-eye"></i> View Site
+        </a>
+      </div>
+
+      <!-- Hero Section Panel -->
+      <div class="section-panel active" id="panel-hero">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Hero Content</h5>
+            <span class="status-badge status-saved" id="hero-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="heroForm">
+              <div class="mb-3">
+                <label class="form-label">Your Name</label>
+                <input type="text" class="form-control" id="heroName" placeholder="Hotcho Gislain">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Typed Items (comma separated)</label>
+                <input type="text" class="form-control" id="heroTypedItems" placeholder="Robotics Developer, Freelancer, Deep Learning Practitioner">
+              </div>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section Panel -->
+      <div class="section-panel" id="panel-about">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>About Content</h5>
+            <span class="status-badge status-saved" id="about-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="aboutForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="aboutName">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Title/Role</label>
+                  <input type="text" class="form-control" id="aboutTitle" placeholder="Robotics Developer & IOT Developer">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Short Bio</label>
+                <textarea class="form-control" id="aboutBio" rows="3"></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Detailed Description</label>
+                <textarea class="form-control" id="aboutDescription" rows="4"></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Birthday (YYYY-MM-DD)</label>
+                  <input type="date" class="form-control" id="aboutBirthday">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Phone</label>
+                  <input type="text" class="form-control" id="aboutPhone">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">City</label>
+                  <input type="text" class="form-control" id="aboutCity">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Degree</label>
+                  <input type="text" class="form-control" id="aboutDegree">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="aboutEmail">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Freelance Status</label>
+                  <select class="form-control" id="aboutFreelance">
+                    <option value="Available">Available</option>
+                    <option value="Not Available">Not Available</option>
+                    <option value="Limited Availability">Limited Availability</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Website URL</label>
+                  <input type="text" class="form-control" id="aboutWebsite">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Facts Section Panel -->
+      <div class="section-panel" id="panel-facts">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Facts & Statistics</h5>
+            <span class="status-badge status-saved" id="facts-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="factsForm">
+              <div class="mb-3">
+                <label class="form-label">Facts Description</label>
+                <textarea class="form-control" id="factsDescription" rows="2"></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Happy Clients</label>
+                  <input type="number" class="form-control" id="factsClients">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Projects</label>
+                  <input type="number" class="form-control" id="factsProjects">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Hours of Support</label>
+                  <input type="number" class="form-control" id="factsHours">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Collaborators</label>
+                  <input type="number" class="form-control" id="factsCollaborators">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Section Panel -->
+      <div class="section-panel" id="panel-skills">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Skills</h5>
+            <span class="status-badge status-saved" id="skills-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="skillsForm">
+              <div class="mb-3">
+                <label class="form-label">Skills Description</label>
+                <textarea class="form-control" id="skillsDescription" rows="2"></textarea>
+              </div>
+              <label class="form-label">Skills (Name & Percentage)</label>
+              <div id="skillsList">
+                <!-- Skills will be dynamically added here -->
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addSkillBtn">
+                <i class="bi bi-plus"></i> Add Skill
+              </button>
+              <hr>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resume Section Panel -->
+      <div class="section-panel" id="panel-resume">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Resume - Summary</h5>
+            <span class="status-badge status-saved" id="resume-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="resumeForm">
+              <div class="mb-3">
+                <label class="form-label">Summary</label>
+                <textarea class="form-control" id="resumeSummary" rows="3"></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Location</label>
+                  <input type="text" class="form-control" id="resumeLocation">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Phone</label>
+                  <input type="text" class="form-control" id="resumePhone">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="resumeEmail">
+                </div>
+              </div>
+              <hr>
+              <h6>Education</h6>
+              <div class="mb-3">
+                <label class="form-label">Degree Title</label>
+                <input type="text" class="form-control" id="eduTitle">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Years</label>
+                  <input type="text" class="form-control" id="eduYears" placeholder="2019 - present">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Institution</label>
+                  <input type="text" class="form-control" id="eduInstitution">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Education Description</label>
+                <textarea class="form-control" id="eduDescription" rows="2"></textarea>
+              </div>
+              <hr>
+              <h6>Experience</h6>
+              <div class="mb-3">
+                <label class="form-label">Job Title</label>
+                <input type="text" class="form-control" id="expTitle">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Years</label>
+                  <input type="text" class="form-control" id="expYears" placeholder="2021 - Present">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Company</label>
+                  <input type="text" class="form-control" id="expCompany">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Experience Description (one point per line)</label>
+                <textarea class="form-control" id="expDescription" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Section Panel -->
+      <div class="section-panel" id="panel-services">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Services</h5>
+            <span class="status-badge status-saved" id="services-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="servicesForm">
+              <div class="mb-3">
+                <label class="form-label">Services Description</label>
+                <textarea class="form-control" id="servicesDescription" rows="2"></textarea>
+              </div>
+              <div id="servicesList">
+                <!-- Services will be dynamically added -->
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addServiceBtn">
+                <i class="bi bi-plus"></i> Add Service
+              </button>
+              <hr>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Section Panel -->
+      <div class="section-panel" id="panel-contact">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Contact Information</h5>
+            <span class="status-badge status-saved" id="contact-status">Saved</span>
+          </div>
+          <div class="edit-card-body">
+            <form id="contactForm">
+              <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" class="form-control" id="contactLocation">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="contactEmail">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text" class="form-control" id="contactPhone">
+              </div>
+              <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmnocUosd4_kyKNZmLuEhW1T3o9FUG19s",
+      authDomain: "portfolio-cms-929f2.firebaseapp.com",
+      projectId: "portfolio-cms-929f2",
+      storageBucket: "portfolio-cms-929f2.firebasestorage.app",
+      messagingSenderId: "216881114488",
+      appId: "1:216881114488:web:f81f81ffd6337231b66c8d"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM Elements
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loginContainer = document.getElementById('loginContainer');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminEmail = document.getElementById('adminEmail');
+    const sectionTitle = document.getElementById('sectionTitle');
+
+    // Section titles map
+    const sectionTitles = {
+      hero: 'Hero Section',
+      about: 'About',
+      facts: 'Facts & Statistics',
+      skills: 'Skills',
+      resume: 'Resume',
+      services: 'Services',
+      contact: 'Contact Info'
+    };
+
+    // Check auth state
+    onAuthStateChanged(auth, async (user) => {
+      loadingOverlay.style.display = 'none';
+      if (user) {
+        loginContainer.style.display = 'none';
+        dashboardContainer.style.display = 'block';
+        adminEmail.textContent = user.email;
+        await loadAllData();
+      } else {
+        loginContainer.style.display = 'flex';
+        dashboardContainer.style.display = 'none';
+      }
+    });
+
+    // Login form submit
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        loginError.style.display = 'none';
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        loginError.textContent = 'Invalid email or password';
+        loginError.style.display = 'block';
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = link.dataset.section;
+        
+        // Update active state
+        document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        
+        // Show corresponding panel
+        document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${section}`).classList.add('active');
+        
+        // Update title
+        sectionTitle.textContent = sectionTitles[section];
+      });
+    });
+
+    // Load all data from Firestore
+    async function loadAllData() {
+      try {
+        // Load Hero
+        const heroDoc = await getDoc(doc(db, 'content', 'hero'));
+        if (heroDoc.exists()) {
+          const data = heroDoc.data();
+          document.getElementById('heroName').value = data.name || '';
+          document.getElementById('heroTypedItems').value = data.typedItems || '';
+        }
+
+        // Load About
+        const aboutDoc = await getDoc(doc(db, 'content', 'about'));
+        if (aboutDoc.exists()) {
+          const data = aboutDoc.data();
+          document.getElementById('aboutName').value = data.name || '';
+          document.getElementById('aboutTitle').value = data.title || '';
+          document.getElementById('aboutBio').value = data.bio || '';
+          document.getElementById('aboutDescription').value = data.description || '';
+          document.getElementById('aboutBirthday').value = data.birthday || '';
+          document.getElementById('aboutPhone').value = data.phone || '';
+          document.getElementById('aboutCity').value = data.city || '';
+          document.getElementById('aboutDegree').value = data.degree || '';
+          document.getElementById('aboutEmail').value = data.email || '';
+          document.getElementById('aboutFreelance').value = data.freelance || 'Available';
+          document.getElementById('aboutWebsite').value = data.website || '';
+        }
+
+        // Load Facts
+        const factsDoc = await getDoc(doc(db, 'content', 'facts'));
+        if (factsDoc.exists()) {
+          const data = factsDoc.data();
+          document.getElementById('factsDescription').value = data.description || '';
+          document.getElementById('factsClients').value = data.clients || 0;
+          document.getElementById('factsProjects').value = data.projects || 0;
+          document.getElementById('factsHours').value = data.hours || 0;
+          document.getElementById('factsCollaborators').value = data.collaborators || 0;
+        }
+
+        // Load Skills
+        const skillsDoc = await getDoc(doc(db, 'content', 'skills'));
+        if (skillsDoc.exists()) {
+          const data = skillsDoc.data();
+          document.getElementById('skillsDescription').value = data.description || '';
+          renderSkills(data.skills || []);
+        } else {
+          renderSkills([]);
+        }
+
+        // Load Resume
+        const resumeDoc = await getDoc(doc(db, 'content', 'resume'));
+        if (resumeDoc.exists()) {
+          const data = resumeDoc.data();
+          document.getElementById('resumeSummary').value = data.summary || '';
+          document.getElementById('resumeLocation').value = data.location || '';
+          document.getElementById('resumePhone').value = data.phone || '';
+          document.getElementById('resumeEmail').value = data.email || '';
+          document.getElementById('eduTitle').value = data.eduTitle || '';
+          document.getElementById('eduYears').value = data.eduYears || '';
+          document.getElementById('eduInstitution').value = data.eduInstitution || '';
+          document.getElementById('eduDescription').value = data.eduDescription || '';
+          document.getElementById('expTitle').value = data.expTitle || '';
+          document.getElementById('expYears').value = data.expYears || '';
+          document.getElementById('expCompany').value = data.expCompany || '';
+          document.getElementById('expDescription').value = data.expDescription || '';
+        }
+
+        // Load Services
+        const servicesDoc = await getDoc(doc(db, 'content', 'services'));
+        if (servicesDoc.exists()) {
+          const data = servicesDoc.data();
+          document.getElementById('servicesDescription').value = data.description || '';
+          renderServices(data.services || []);
+        } else {
+          renderServices([]);
+        }
+
+        // Load Contact
+        const contactDoc = await getDoc(doc(db, 'content', 'contact'));
+        if (contactDoc.exists()) {
+          const data = contactDoc.data();
+          document.getElementById('contactLocation').value = data.location || '';
+          document.getElementById('contactEmail').value = data.email || '';
+          document.getElementById('contactPhone').value = data.phone || '';
+        }
+
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    }
+
+    // Render skills list
+    function renderSkills(skills) {
+      const container = document.getElementById('skillsList');
+      container.innerHTML = '';
+      
+      if (skills.length === 0) {
+        skills = [{ name: '', percentage: 50 }];
+      }
+      
+      skills.forEach((skill, index) => {
+        const div = document.createElement('div');
+        div.className = 'skill-item';
+        div.innerHTML = `
+          <input type="text" class="form-control skill-name" placeholder="Skill name" value="${skill.name || ''}">
+          <input type="number" class="form-control skill-percent" min="0" max="100" placeholder="%" value="${skill.percentage || 50}">
+          <button type="button" class="btn btn-outline-danger btn-sm remove-skill"><i class="bi bi-trash"></i></button>
+        `;
+        container.appendChild(div);
+      });
+      
+      // Add remove handlers
+      container.querySelectorAll('.remove-skill').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.target.closest('.skill-item').remove();
+        });
+      });
+    }
+
+    // Add skill button
+    document.getElementById('addSkillBtn').addEventListener('click', () => {
+      const container = document.getElementById('skillsList');
+      const div = document.createElement('div');
+      div.className = 'skill-item';
+      div.innerHTML = `
+        <input type="text" class="form-control skill-name" placeholder="Skill name" value="">
+        <input type="number" class="form-control skill-percent" min="0" max="100" placeholder="%" value="50">
+        <button type="button" class="btn btn-outline-danger btn-sm remove-skill"><i class="bi bi-trash"></i></button>
+      `;
+      container.appendChild(div);
+      div.querySelector('.remove-skill').addEventListener('click', () => div.remove());
+    });
+
+    // Render services list
+    function renderServices(services) {
+      const container = document.getElementById('servicesList');
+      container.innerHTML = '';
+      
+      if (services.length === 0) {
+        services = [{ title: '', description: '', icon: 'bi-briefcase' }];
+      }
+      
+      services.forEach((service, index) => {
+        const div = document.createElement('div');
+        div.className = 'service-item mb-3 p-3 border rounded';
+        div.innerHTML = `
+          <div class="d-flex justify-content-between mb-2">
+            <strong>Service ${index + 1}</strong>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-service"><i class="bi bi-trash"></i></button>
+          </div>
+          <div class="mb-2">
+            <input type="text" class="form-control service-title" placeholder="Service title" value="${service.title || ''}">
+          </div>
+          <div class="mb-2">
+            <textarea class="form-control service-desc" rows="2" placeholder="Service description">${service.description || ''}</textarea>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      
+      container.querySelectorAll('.remove-service').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.target.closest('.service-item').remove();
+        });
+      });
+    }
+
+    // Add service button
+    document.getElementById('addServiceBtn').addEventListener('click', () => {
+      const container = document.getElementById('servicesList');
+      const index = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'service-item mb-3 p-3 border rounded';
+      div.innerHTML = `
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Service ${index + 1}</strong>
+          <button type="button" class="btn btn-outline-danger btn-sm remove-service"><i class="bi bi-trash"></i></button>
+        </div>
+        <div class="mb-2">
+          <input type="text" class="form-control service-title" placeholder="Service title" value="">
+        </div>
+        <div class="mb-2">
+          <textarea class="form-control service-desc" rows="2" placeholder="Service description"></textarea>
+        </div>
+      `;
+      container.appendChild(div);
+      div.querySelector('.remove-service').addEventListener('click', () => div.remove());
+    });
+
+    // Save Hero
+    document.getElementById('heroForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'content', 'hero'), {
+          name: document.getElementById('heroName').value,
+          typedItems: document.getElementById('heroTypedItems').value
+        });
+        alert('Hero section saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+    // Save About
+    document.getElementById('aboutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'content', 'about'), {
+          name: document.getElementById('aboutName').value,
+          title: document.getElementById('aboutTitle').value,
+          bio: document.getElementById('aboutBio').value,
+          description: document.getElementById('aboutDescription').value,
+          birthday: document.getElementById('aboutBirthday').value,
+          phone: document.getElementById('aboutPhone').value,
+          city: document.getElementById('aboutCity').value,
+          degree: document.getElementById('aboutDegree').value,
+          email: document.getElementById('aboutEmail').value,
+          freelance: document.getElementById('aboutFreelance').value,
+          website: document.getElementById('aboutWebsite').value
+        });
+        alert('About section saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+    // Save Facts
+    document.getElementById('factsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'content', 'facts'), {
+          description: document.getElementById('factsDescription').value,
+          clients: parseInt(document.getElementById('factsClients').value) || 0,
+          projects: parseInt(document.getElementById('factsProjects').value) || 0,
+          hours: parseInt(document.getElementById('factsHours').value) || 0,
+          collaborators: parseInt(document.getElementById('factsCollaborators').value) || 0
+        });
+        alert('Facts section saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+    // Save Skills
+    document.getElementById('skillsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const skills = [];
+        document.querySelectorAll('.skill-item').forEach(item => {
+          const name = item.querySelector('.skill-name').value;
+          const percentage = parseInt(item.querySelector('.skill-percent').value) || 0;
+          if (name) {
+            skills.push({ name, percentage });
+          }
+        });
+        
+        await setDoc(doc(db, 'content', 'skills'), {
+          description: document.getElementById('skillsDescription').value,
+          skills: skills
+        });
+        alert('Skills saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+    // Save Resume
+    document.getElementById('resumeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'content', 'resume'), {
+          summary: document.getElementById('resumeSummary').value,
+          location: document.getElementById('resumeLocation').value,
+          phone: document.getElementById('resumePhone').value,
+          email: document.getElementById('resumeEmail').value,
+          eduTitle: document.getElementById('eduTitle').value,
+          eduYears: document.getElementById('eduYears').value,
+          eduInstitution: document.getElementById('eduInstitution').value,
+          eduDescription: document.getElementById('eduDescription').value,
+          expTitle: document.getElementById('expTitle').value,
+          expYears: document.getElementById('expYears').value,
+          expCompany: document.getElementById('expCompany').value,
+          expDescription: document.getElementById('expDescription').value
+        });
+        alert('Resume saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+    // Save Services
+    document.getElementById('servicesForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const services = [];
+        document.querySelectorAll('.service-item').forEach(item => {
+          const title = item.querySelector('.service-title').value;
+          const description = item.querySelector('.service-desc').value;
+          if (title) {
+            services.push({ title, description });
+          }
+        });
+        
+        await setDoc(doc(db, 'content', 'services'), {
+          description: document.getElementById('servicesDescription').value,
+          services: services
+        });
+        alert('Services saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+    // Save Contact
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'content', 'contact'), {
+          location: document.getElementById('contactLocation').value,
+          email: document.getElementById('contactEmail').value,
+          phone: document.getElementById('contactPhone').value
+        });
+        alert('Contact info saved!');
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
+    });
+
+  </script>
+</body>
+</html>
+

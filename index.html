@@ -589,6 +589,170 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js?v=3"></script>
 
+  <!-- Firebase SDK for Dynamic Content -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmnocUosd4_kyKNZmLuEhW1T3o9FUG19s",
+      authDomain: "portfolio-cms-929f2.firebaseapp.com",
+      projectId: "portfolio-cms-929f2",
+      storageBucket: "portfolio-cms-929f2.firebasestorage.app",
+      messagingSenderId: "216881114488",
+      appId: "1:216881114488:web:f81f81ffd6337231b66c8d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Load dynamic content from Firebase
+    async function loadContent() {
+      try {
+        // Load Hero
+        const heroDoc = await getDoc(doc(db, 'content', 'hero'));
+        if (heroDoc.exists()) {
+          const data = heroDoc.data();
+          const heroName = document.querySelector('#hero h1');
+          const typedEl = document.querySelector('.typed');
+          if (heroName && data.name) heroName.textContent = data.name;
+          if (typedEl && data.typedItems) typedEl.setAttribute('data-typed-items', data.typedItems);
+        }
+
+        // Load About
+        const aboutDoc = await getDoc(doc(db, 'content', 'about'));
+        if (aboutDoc.exists()) {
+          const data = aboutDoc.data();
+          const aboutTitle = document.querySelector('#about .section-title p');
+          const aboutRoleTitle = document.querySelector('#about .content h3');
+          const aboutBio = document.querySelector('#about .content .fst-italic');
+          const aboutDesc = document.querySelector('#about .content > p:last-of-type');
+          
+          if (aboutTitle && data.bio) aboutTitle.textContent = data.bio;
+          if (aboutRoleTitle && data.title) aboutRoleTitle.textContent = data.title;
+          if (aboutDesc && data.description) aboutDesc.textContent = data.description;
+          
+          // Update info items
+          const updateInfo = (label, value) => {
+            if (!value) return;
+            const items = document.querySelectorAll('#about li');
+            items.forEach(item => {
+              if (item.textContent.includes(label)) {
+                const span = item.querySelector('span');
+                if (span) span.textContent = value;
+              }
+            });
+          };
+          
+          if (data.birthday) {
+            const ageEl = document.getElementById('age');
+            if (ageEl) ageEl.setAttribute('data-birth', data.birthday);
+          }
+          updateInfo('Phone:', data.phone);
+          updateInfo('City:', data.city);
+          updateInfo('Degree:', data.degree);
+          updateInfo('Email:', data.email);
+          updateInfo('Freelance:', data.freelance);
+          updateInfo('Website:', data.website);
+        }
+
+        // Load Facts
+        const factsDoc = await getDoc(doc(db, 'content', 'facts'));
+        if (factsDoc.exists()) {
+          const data = factsDoc.data();
+          const factsDesc = document.querySelector('#facts .section-title p');
+          if (factsDesc && data.description) factsDesc.textContent = data.description;
+          
+          const counters = document.querySelectorAll('#facts .purecounter');
+          if (counters[0] && data.clients) counters[0].setAttribute('data-purecounter-end', data.clients);
+          if (counters[1] && data.projects) counters[1].setAttribute('data-purecounter-end', data.projects);
+          if (counters[2] && data.hours) counters[2].setAttribute('data-purecounter-end', data.hours);
+          if (counters[3] && data.collaborators) counters[3].setAttribute('data-purecounter-end', data.collaborators);
+        }
+
+        // Load Skills
+        const skillsDoc = await getDoc(doc(db, 'content', 'skills'));
+        if (skillsDoc.exists()) {
+          const data = skillsDoc.data();
+          const skillsDesc = document.querySelector('#skills .section-title p');
+          if (skillsDesc && data.description) skillsDesc.textContent = data.description;
+          
+          if (data.skills && data.skills.length > 0) {
+            const skillsContainer = document.querySelector('.skills-content .row');
+            if (skillsContainer) {
+              const leftCol = skillsContainer.querySelector('.col-lg-6:first-child');
+              const rightCol = skillsContainer.querySelector('.col-lg-6:last-child');
+              if (leftCol && rightCol) {
+                leftCol.innerHTML = '';
+                rightCol.innerHTML = '';
+                data.skills.forEach((skill, index) => {
+                  const skillHtml = `
+                    <div class="progress">
+                      <span class="skill">${skill.name}<i class="val">${skill.percentage}%</i></span>
+                      <div class="progress-bar-wrap">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="${skill.percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                    </div>
+                  `;
+                  if (index < Math.ceil(data.skills.length / 2)) {
+                    leftCol.innerHTML += skillHtml;
+                  } else {
+                    rightCol.innerHTML += skillHtml;
+                  }
+                });
+              }
+            }
+          }
+        }
+
+        // Load Services
+        const servicesDoc = await getDoc(doc(db, 'content', 'services'));
+        if (servicesDoc.exists()) {
+          const data = servicesDoc.data();
+          const servicesDesc = document.querySelector('#services .section-title p');
+          if (servicesDesc && data.description) servicesDesc.textContent = data.description;
+          
+          if (data.services && data.services.length > 0) {
+            const servicesRow = document.querySelector('#services .row');
+            if (servicesRow) {
+              const icons = ['bi-briefcase', 'bi-card-checklist', 'bi-bar-chart', 'bi-binoculars', 'bi-brightness-high', 'bi-calendar4-week'];
+              servicesRow.innerHTML = '';
+              data.services.forEach((service, index) => {
+                const serviceHtml = `
+                  <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up" data-aos-delay="${index * 100}">
+                    <div class="icon"><i class="bi ${icons[index % icons.length]}"></i></div>
+                    <h4 class="title"><a href="">${service.title}</a></h4>
+                    <p class="description">${service.description}</p>
+                  </div>
+                `;
+                servicesRow.innerHTML += serviceHtml;
+              });
+            }
+          }
+        }
+
+        // Load Contact
+        const contactDoc = await getDoc(doc(db, 'content', 'contact'));
+        if (contactDoc.exists()) {
+          const data = contactDoc.data();
+          const locationEl = document.querySelector('#contact .address p');
+          const emailEl = document.querySelector('#contact .email p');
+          const phoneEl = document.querySelector('#contact .phone p');
+          
+          if (locationEl && data.location) locationEl.textContent = data.location;
+          if (emailEl && data.email) emailEl.textContent = data.email;
+          if (phoneEl && data.phone) phoneEl.textContent = data.phone;
+        }
+
+      } catch (error) {
+        console.log('Using default content (Firebase not configured or no data yet)');
+      }
+    }
+
+    // Load content when DOM is ready
+    document.addEventListener('DOMContentLoaded', loadContent);
+  </script>
+
 </body>
 
 </html>
