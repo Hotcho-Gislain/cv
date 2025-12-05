@@ -458,27 +458,26 @@
       <div class="container" data-aos="fade-up">
         <div class="section-title">
           <h2>Testimonials</h2>
-          <p>Though out my sessions and project developments and monitoring i have impacted and served as an inspiration to many youths.</p>
+          <p>Throughout my sessions and project developments, I have impacted and served as an inspiration to many.</p>
         </div>
 
         <div class="testimonials-slider swiper" data-aos="fade-up" data-aos-delay="100">
-          <div class="swiper-wrapper">
-
+          <div class="swiper-wrapper" id="testimonials-wrapper">
+            <!-- Testimonials will be loaded dynamically from Firebase -->
             <div class="swiper-slide">
               <div class="testimonial-wrap">
                 <div class="testimonial-item">
                   <img src="assets/img/testimonials/frank.jpg" class="testimonial-img" alt="">
-                  <h3>Frank </h3>
+                  <h3>Frank</h3>
                   <h4>University Student &amp; UVA member</h4>
                   <p>
                     <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                    I found the training sessions explicit, straight tonthe point and yet vry enriching. it gave me a solid foundation from which i could learn basically anything in the field of Robotics with les 
-                    difficulty than before. ot played a big role for me in my journey as a robotics engineer. thank you.
+                    I found the training sessions explicit, straight to the point and yet very enriching. It gave me a solid foundation from which I could learn basically anything in the field of Robotics with less difficulty than before.
                     <i class="bx bxs-quote-alt-right quote-icon-right"></i>
                   </p>
                 </div>
               </div>
-            </div><!-- End testimonial item -->
+            </div>
             <div class="swiper-slide">
               <div class="testimonial-wrap">
                 <div class="testimonial-item">
@@ -487,14 +486,66 @@
                   <h4>CEO of UVLAB</h4>
                   <p>
                     <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                    I am very inmpressed with your commitment and hard work in what you do. You are very dynamic and am impressed of the way you took and managed this first edition of UVA .
+                    I am very impressed with your commitment and hard work in what you do. You are very dynamic and I'm impressed with the way you took and managed this first edition of UVA.
                     <i class="bx bxs-quote-alt-right quote-icon-right"></i>
                   </p>
                 </div>
               </div>
-            </div><!-- End testimonial item -->
+            </div>
           </div> <!-- .swiper-wrapper -->
         </div> <!-- .testimonials-slider -->
+
+        <!-- Leave a Review Button & Form -->
+        <div class="text-center mt-4">
+          <button class="btn" id="openReviewFormBtn" style="background: #149ddd; color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600;">
+            <i class="bi bi-star-fill"></i> Leave a Review
+          </button>
+        </div>
+
+        <!-- Review Form Modal -->
+        <div id="reviewFormModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+          <div style="background: white; padding: 30px; border-radius: 16px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h4 style="margin: 0; color: #040b14;">Leave a Review</h4>
+              <button id="closeReviewFormBtn" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            <form id="reviewForm">
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Your Name *</label>
+                <input type="text" id="reviewName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+              </div>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Your Title/Role *</label>
+                <input type="text" id="reviewTitle" required placeholder="e.g., Student, Developer, CEO" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+              </div>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Your Email (not displayed) *</label>
+                <input type="email" id="reviewEmail" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+              </div>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Your Review *</label>
+                <textarea id="reviewText" required rows="4" placeholder="Share your experience..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
+              </div>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Rating *</label>
+                <select id="reviewRating" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                  <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                  <option value="4">⭐⭐⭐⭐ Very Good</option>
+                  <option value="3">⭐⭐⭐ Good</option>
+                  <option value="2">⭐⭐ Fair</option>
+                  <option value="1">⭐ Poor</option>
+                </select>
+              </div>
+              <button type="submit" id="submitReviewBtn" style="width: 100%; padding: 12px; background: #149ddd; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Submit Review
+              </button>
+              <p style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                Your review will be visible after approval.
+              </p>
+            </form>
+          </div>
+        </div>
+
       </div> <!-- .container -->
     </section><!-- End Testimonials Section -->
 
@@ -587,12 +638,12 @@
   <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
 
   <!-- Template Main JS File -->
-  <script src="assets/js/main.js?v=4"></script>
+  <script src="assets/js/main.js?v=5"></script>
 
   <!-- Firebase SDK for Dynamic Content -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBmnocUosd4_kyKNZmLuEhW1T3o9FUG19s",
@@ -777,6 +828,134 @@
 
     // Load content when DOM is ready
     document.addEventListener('DOMContentLoaded', loadContent);
+
+    // ==================== REVIEWS FUNCTIONALITY ====================
+
+    // Load approved reviews
+    async function loadReviews() {
+      try {
+        const reviewsQuery = query(
+          collection(db, 'reviews'),
+          where('approved', '==', true),
+          orderBy('createdAt', 'desc')
+        );
+        const querySnapshot = await getDocs(reviewsQuery);
+        
+        if (!querySnapshot.empty) {
+          const wrapper = document.getElementById('testimonials-wrapper');
+          if (wrapper) {
+            // Clear existing testimonials and add approved ones
+            wrapper.innerHTML = '';
+            
+            querySnapshot.forEach((doc) => {
+              const review = doc.data();
+              const slideHtml = `
+                <div class="swiper-slide">
+                  <div class="testimonial-wrap">
+                    <div class="testimonial-item">
+                      <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img" alt="">
+                      <h3>${review.name}</h3>
+                      <h4>${review.title}</h4>
+                      <p>
+                        <i class="bx bxs-quote-alt-left quote-icon-left"></i>
+                        ${review.text}
+                        <i class="bx bxs-quote-alt-right quote-icon-right"></i>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              `;
+              wrapper.innerHTML += slideHtml;
+            });
+
+            // Reinitialize Swiper after adding new slides
+            if (typeof Swiper !== 'undefined') {
+              new Swiper('.testimonials-slider', {
+                speed: 600,
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                slidesPerView: 'auto',
+                pagination: { el: '.swiper-pagination', type: 'bullets', clickable: true },
+                breakpoints: {
+                  320: { slidesPerView: 1, spaceBetween: 20 },
+                  1200: { slidesPerView: 3, spaceBetween: 20 }
+                }
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.log('Reviews not loaded:', error.message);
+      }
+    }
+
+    // Load reviews after DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(loadReviews, 1000); // Delay to ensure Swiper is initialized first
+    });
+
+    // Review form modal functionality
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('reviewFormModal');
+      const openBtn = document.getElementById('openReviewFormBtn');
+      const closeBtn = document.getElementById('closeReviewFormBtn');
+      const form = document.getElementById('reviewForm');
+
+      if (openBtn) {
+        openBtn.addEventListener('click', () => {
+          modal.style.display = 'flex';
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+        });
+      }
+
+      // Close on outside click
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      }
+
+      // Submit review
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const submitBtn = document.getElementById('submitReviewBtn');
+          const originalText = submitBtn.textContent;
+          submitBtn.textContent = 'Submitting...';
+          submitBtn.disabled = true;
+
+          try {
+            await addDoc(collection(db, 'reviews'), {
+              name: document.getElementById('reviewName').value,
+              title: document.getElementById('reviewTitle').value,
+              email: document.getElementById('reviewEmail').value,
+              text: document.getElementById('reviewText').value,
+              rating: parseInt(document.getElementById('reviewRating').value),
+              approved: false, // Requires admin approval
+              createdAt: new Date().toISOString()
+            });
+
+            alert('Thank you for your review! It will be visible after approval.');
+            form.reset();
+            modal.style.display = 'none';
+          } catch (error) {
+            alert('Error submitting review. Please try again.');
+            console.error(error);
+          } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }
+        });
+      }
+    });
   </script>
 
 </body>
