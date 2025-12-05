@@ -587,7 +587,7 @@
   <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
 
   <!-- Template Main JS File -->
-  <script src="assets/js/main.js?v=3"></script>
+  <script src="assets/js/main.js?v=4"></script>
 
   <!-- Firebase SDK for Dynamic Content -->
   <script type="module">
@@ -609,6 +609,32 @@
     // Load dynamic content from Firebase
     async function loadContent() {
       try {
+        // Load Images
+        const imagesDoc = await getDoc(doc(db, 'content', 'images'));
+        if (imagesDoc.exists()) {
+          const data = imagesDoc.data();
+          
+          // Profile image in sidebar
+          if (data.profileImage) {
+            const profileImg = document.querySelector('.profile img');
+            if (profileImg) profileImg.src = data.profileImage;
+          }
+          
+          // Hero background
+          if (data.heroBg) {
+            const heroSection = document.getElementById('hero');
+            if (heroSection) {
+              heroSection.style.backgroundImage = `url('${data.heroBg}')`;
+            }
+          }
+          
+          // About section image
+          if (data.aboutImage) {
+            const aboutImg = document.querySelector('#about .col-lg-4 img');
+            if (aboutImg) aboutImg.src = data.aboutImage;
+          }
+        }
+
         // Load Hero
         const heroDoc = await getDoc(doc(db, 'content', 'hero'));
         if (heroDoc.exists()) {

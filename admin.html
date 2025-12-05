@@ -295,6 +295,7 @@
       </div>
       <ul class="sidebar-nav">
         <li><a href="#" data-section="hero" class="active"><i class="bi bi-house"></i> Hero Section</a></li>
+        <li><a href="#" data-section="images"><i class="bi bi-image"></i> Images</a></li>
         <li><a href="#" data-section="about"><i class="bi bi-person"></i> About</a></li>
         <li><a href="#" data-section="facts"><i class="bi bi-graph-up"></i> Facts/Stats</a></li>
         <li><a href="#" data-section="skills"><i class="bi bi-tools"></i> Skills</a></li>
@@ -335,6 +336,84 @@
               </div>
               <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
             </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Images Section Panel -->
+      <div class="section-panel" id="panel-images">
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Profile Image</h5>
+          </div>
+          <div class="edit-card-body">
+            <div class="row align-items-center">
+              <div class="col-md-4 text-center mb-3">
+                <img id="profileImagePreview" src="assets/img/profile-img.png" class="image-preview rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+              </div>
+              <div class="col-md-8">
+                <div class="mb-3">
+                  <label class="form-label">Upload New Profile Image</label>
+                  <input type="file" class="form-control" id="profileImageInput" accept="image/*">
+                </div>
+                <button type="button" class="btn btn-save" id="uploadProfileBtn">
+                  <i class="bi bi-cloud-upload"></i> Upload Profile Image
+                </button>
+                <div class="progress mt-2" style="display:none;" id="profileProgress">
+                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>Hero Background Image</h5>
+          </div>
+          <div class="edit-card-body">
+            <div class="row align-items-center">
+              <div class="col-md-4 text-center mb-3">
+                <img id="heroBgPreview" src="assets/img/hero-bg.jpg" class="image-preview" style="width: 200px; height: 120px; object-fit: cover; border-radius: 8px;">
+              </div>
+              <div class="col-md-8">
+                <div class="mb-3">
+                  <label class="form-label">Upload New Hero Background</label>
+                  <input type="file" class="form-control" id="heroBgInput" accept="image/*">
+                </div>
+                <button type="button" class="btn btn-save" id="uploadHeroBgBtn">
+                  <i class="bi bi-cloud-upload"></i> Upload Hero Background
+                </button>
+                <div class="progress mt-2" style="display:none;" id="heroBgProgress">
+                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-card">
+          <div class="edit-card-header">
+            <h5>About Section Image</h5>
+          </div>
+          <div class="edit-card-body">
+            <div class="row align-items-center">
+              <div class="col-md-4 text-center mb-3">
+                <img id="aboutImagePreview" src="assets/img/profile-img.jpg" class="image-preview" style="width: 150px; height: 180px; object-fit: cover;">
+              </div>
+              <div class="col-md-8">
+                <div class="mb-3">
+                  <label class="form-label">Upload New About Image</label>
+                  <input type="file" class="form-control" id="aboutImageInput" accept="image/*">
+                </div>
+                <button type="button" class="btn btn-save" id="uploadAboutBtn">
+                  <i class="bi bi-cloud-upload"></i> Upload About Image
+                </button>
+                <div class="progress mt-2" style="display:none;" id="aboutProgress">
+                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -612,6 +691,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
     // Firebase Configuration
     const firebaseConfig = {
@@ -627,6 +707,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     // DOM Elements
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -641,6 +722,7 @@
     // Section titles map
     const sectionTitles = {
       hero: 'Hero Section',
+      images: 'Images',
       about: 'About',
       facts: 'Facts & Statistics',
       skills: 'Skills',
@@ -1027,6 +1109,152 @@
         alert('Contact info saved!');
       } catch (error) {
         alert('Error saving: ' + error.message);
+      }
+    });
+
+    // ==================== IMAGE UPLOAD FUNCTIONALITY ====================
+
+    // Load existing image URLs
+    async function loadImageUrls() {
+      try {
+        const imagesDoc = await getDoc(doc(db, 'content', 'images'));
+        if (imagesDoc.exists()) {
+          const data = imagesDoc.data();
+          if (data.profileImage) {
+            document.getElementById('profileImagePreview').src = data.profileImage;
+          }
+          if (data.heroBg) {
+            document.getElementById('heroBgPreview').src = data.heroBg;
+          }
+          if (data.aboutImage) {
+            document.getElementById('aboutImagePreview').src = data.aboutImage;
+          }
+        }
+      } catch (error) {
+        console.log('No saved images yet');
+      }
+    }
+
+    // Call loadImageUrls after auth
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await loadImageUrls();
+      }
+    });
+
+    // Generic upload function
+    async function uploadImage(file, storagePath, progressEl, previewEl, imageKey) {
+      return new Promise((resolve, reject) => {
+        const storageRef = ref(storage, storagePath);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        progressEl.style.display = 'block';
+
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            progressEl.querySelector('.progress-bar').style.width = progress + '%';
+          },
+          (error) => {
+            progressEl.style.display = 'none';
+            reject(error);
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            progressEl.style.display = 'none';
+            previewEl.src = downloadURL;
+
+            // Save URL to Firestore
+            const imagesDoc = await getDoc(doc(db, 'content', 'images'));
+            const existingData = imagesDoc.exists() ? imagesDoc.data() : {};
+            existingData[imageKey] = downloadURL;
+            await setDoc(doc(db, 'content', 'images'), existingData);
+
+            resolve(downloadURL);
+          }
+        );
+      });
+    }
+
+    // Profile Image Upload
+    document.getElementById('uploadProfileBtn').addEventListener('click', async () => {
+      const fileInput = document.getElementById('profileImageInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Please select an image first');
+        return;
+      }
+
+      try {
+        const progressEl = document.getElementById('profileProgress');
+        const previewEl = document.getElementById('profileImagePreview');
+        await uploadImage(file, `images/profile-${Date.now()}.${file.name.split('.').pop()}`, progressEl, previewEl, 'profileImage');
+        alert('Profile image uploaded successfully!');
+        fileInput.value = '';
+      } catch (error) {
+        alert('Error uploading: ' + error.message);
+      }
+    });
+
+    // Hero Background Upload
+    document.getElementById('uploadHeroBgBtn').addEventListener('click', async () => {
+      const fileInput = document.getElementById('heroBgInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Please select an image first');
+        return;
+      }
+
+      try {
+        const progressEl = document.getElementById('heroBgProgress');
+        const previewEl = document.getElementById('heroBgPreview');
+        await uploadImage(file, `images/hero-bg-${Date.now()}.${file.name.split('.').pop()}`, progressEl, previewEl, 'heroBg');
+        alert('Hero background uploaded successfully!');
+        fileInput.value = '';
+      } catch (error) {
+        alert('Error uploading: ' + error.message);
+      }
+    });
+
+    // About Image Upload
+    document.getElementById('uploadAboutBtn').addEventListener('click', async () => {
+      const fileInput = document.getElementById('aboutImageInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Please select an image first');
+        return;
+      }
+
+      try {
+        const progressEl = document.getElementById('aboutProgress');
+        const previewEl = document.getElementById('aboutImagePreview');
+        await uploadImage(file, `images/about-${Date.now()}.${file.name.split('.').pop()}`, progressEl, previewEl, 'aboutImage');
+        alert('About image uploaded successfully!');
+        fileInput.value = '';
+      } catch (error) {
+        alert('Error uploading: ' + error.message);
+      }
+    });
+
+    // Preview image before upload
+    document.getElementById('profileImageInput').addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        document.getElementById('profileImagePreview').src = URL.createObjectURL(e.target.files[0]);
+      }
+    });
+
+    document.getElementById('heroBgInput').addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        document.getElementById('heroBgPreview').src = URL.createObjectURL(e.target.files[0]);
+      }
+    });
+
+    document.getElementById('aboutImageInput').addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        document.getElementById('aboutImagePreview').src = URL.createObjectURL(e.target.files[0]);
       }
     });
 
